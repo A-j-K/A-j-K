@@ -589,8 +589,8 @@ function scannow()
 	var sunpos = SunCalc.getPosition(ldate, obs.lat, obs.lon);
 	var sunpostxt = "Sun elevation: " +
 		satellite.radiansToDegrees(sunpos.altitude).toFixed(1) + "°, " +
-		satellite.radiansToDegrees(sunpos.azimuth).toFixed(1) + "°, " +
-		satellites.length.toString();
+		satellite.radiansToDegrees(sunpos.azimuth).toFixed(1) + "° " +
+		" &nbsp; Num of satellites loaded " + satellites.length.toString();
 	$("#sunelevation").html(sunpostxt);
 	satellites.forEach(function(item, index){
 		if(item.handle > 0) {
