@@ -1,0 +1,207 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<!-- 
+	VirtualSky instructions	http://slowe.github.io/VirtualSky/ 
+-->
+
+<style>
+body
+{
+	/* font-family: "courier new"; */
+	/* font-size: 0.75em; */
+}
+
+.maindisplaytable
+{
+	font-family: "courier new";
+	font-size: .75em;
+	font-weight: bold;
+}
+</style>
+
+<script src="jquery-3.4.1.min.js"></script>
+<script src="VirtualSky/0.7.0/stuquery.js"></script>
+<script src="VirtualSky/0.7.0/virtualsky.js"></script>
+<script src="satellite.js"></script>
+<script src="suncalc.js"></script>
+<script src="vsat.js"></script>
+<script src="rotate.js"></script>
+
+<script>
+var planetarium;
+var planetarium2;
+var satellites;
+var display_sats;
+var aos_wav;
+var los_wav;
+var observer;
+var timer;
+var executing = false;
+
+function set_planetarium(sdate)
+{
+	var projection = $("#projection").val();
+	var obs = getObserverLocation();
+	
+	planetarium = S.virtualsky({
+		id: 'starmap',	// This should match the ID used in the DOM
+		credit: false,
+		projection: projection,
+		az: 225,
+		fov: 5,
+		clock: sdate,
+		keyboard: true,
+		gradient: false,
+		negative: false,
+		showplanets: true,
+		showplanetlabels: true,
+		showdate: true,
+		showhelp: false,
+		showstarlabels: true,
+		showgalaxy: false,
+		gridlines_az: true,
+		gridstep: 10,
+		latitude: obs.lat,
+		longitude: obs.lon,
+		showposition: false,
+		meteorshowers: true,
+		meridian: true,
+		ecliptic: true,
+		constellations: true,
+		constellationlabels: true,
+		constellationboundaries: false
+	});
+}
+
+S(document).ready(function() {
+	aos_wav = new Audio('sounds/aos.wav');
+	los_wav = new Audio('sounds/los.wav');
+	display_sats = new Array;
+	satellites = load_sats();
+	observer = load_observer();
+	var sdate_str = $("#sdate").val();
+	var sdate = sdate_str.length > 0 ? new Date(sdate_str) : new Date();
+	$("#sdate").val(sdate.toISOString());
+	set_planetarium(sdate);	
+	
+	$("#playaos").click(function() {
+		aos_wav.play();
+	});
+	
+	$("#playlos").click(function() {
+		los_wav.play();
+	});
+	
+	$("#showcoords").click(function(){ 
+		if($("#coords").is(":visible")) {
+			$("#coords").toggle();
+		}
+		else {
+			if(confirm("You are about to reveal your location, continue?")) {
+				$("#coords").toggle();
+			}
+		}
+	});
+	
+	$("#showmaintable").click(function(){
+		$("#maintable_div").toggle();
+	});
+	
+	$("#setscannowtime").click(function() {
+		scanattimenow();
+	});
+	
+	if($("#cbexecute").prop("checked") == true) {
+		timer = window.setInterval(scanattimenow, 1000);
+	}
+	
+	$(".starmap_btn_help").hide();
+	
+	$("#scannow").click(function(){		
+		scannow();
+	});
+	
+	$("#runit").click(function() {
+		runtest();
+	});
+	
+	document.body.onkeyup = function(e)
+	{
+		if(e.keyCode == 32) {
+			var cb = $("#cbexecute").trigger("click", "cbexecute");
+		}
+	}
+
+});
+</script>
+
+</head>
+<body>
+<table width="100%">
+<tr id="#virtualsky_tr">
+	<td colspan="3">
+		<!-- <div id="starmap" style="width:100%;height:480px;"></div> -->
+		<div id="starmap" style="height:500px;"></div>
+		</td>
+<tr id="#commandbar_tr">
+	<td colspan="3">
+		<input type="text" id="sdate" value="2019-09-04T02:31:00.000Z"></input>		
+		Rate:<input type="text" id="simspeed" value="1" size="6" maxlength="6"></input>
+		<strong><span id="sunelevation"></span></strong>
+		</td>
+	</tr>		
+<tr id="#commandbar_tr3">
+	<td colspan="3">
+		<select name="projection" id="projection">
+			<option value="stereo" default>stereo</option>
+			<option value="lambert">lambert</option>
+			<option value="equirectangular">equirectangular</option>
+			<option value="fisheye">fisheye</option>
+			<option value="plainchart">plainchart</option>			
+			<option value="ortho">ortho</option>
+			<option value="polar">polar</option>
+		</select>
+		</td>
+	</tr>		
+<tr id="#commandbar_tr2">
+	<td colspan="3">
+		<button id="showmaintable">Toggle maintable</button>
+		<button id="showcoords">Toggle obs location</button>
+		<span style="float: right;">
+		Execute:<input type="checkbox" id="cbexecute" onclick="cb_callback_execute(this.id)" checked /><br/>
+		Realtime:<input type="checkbox" id="cbrealtime" checked /><br/>
+		Show Sat IDs:<input type="checkbox" id="cbshowsatid" checked /><br/>
+		Show lit:<input type="checkbox" id="cbshowlit" checked><br/>
+		Show lit path:<input type="checkbox" id="cbshowlitpath" checked><br/>
+		Show unlit path:<input type="checkbox" id="cbshowunlitpath" unchecked><br/>
+		</span>
+		</td>
+	</tr>		
+<tr>
+	<td>
+		<span style="float: right;">
+		<span id="coords" style="display:none;">
+		<strong>Your observing location</strong><br/>
+		Latitude:<input size="10" maxlength="10" type="text" id="latitude" value=""></input><br/>
+		Note, latitude + for north and - for south.<br/>
+		Longitude:<input size="10" maxlength="10" type="text" id="longitude" value=""></input><br/>
+		Note, longitude + for east and - for west.<br/>
+		Height:<input size="8" type="text" id="height" value=""></input><br/>
+		Note, height in metres.<br/>
+		<!--
+		&nbsp;&nbsp;&nbsp;FE:<input type="checkbox" id="cbfe"/>
+		-->
+		</span>	
+		</span>	
+	</td>
+	</tr>
+	</table>
+
+<div id="maintable_div" style="display:none;">
+<table id='maintable' width='99%'><tr></tr></table>
+</div>
+
+
+</body>
+</html>

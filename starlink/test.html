@@ -1,0 +1,47 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+body
+{
+	/* font-family: "courier new"; */
+	/* font-size: 0.75em; */
+}
+
+.maindisplaytable
+{
+	font-family: "courier new";
+	font-size: .75em;
+	font-weight: bold;
+}
+</style>
+
+<script src="jquery-3.4.1.min.js"></script>
+<!--
+http://sylvester.jcoglan.com/
+-->
+<script src="sylvester.js"></script>
+<script src="rotate2.js"></script>
+
+<script>
+
+$(document).ready(function() {
+
+	runtest();
+	
+	$("#run").click(function() {
+		runtest();
+	})
+
+});
+</script>
+
+</head>
+<body>
+AZM <input type="text" id="testazm" value="0"></input><br/>
+ELE <input type="text" id="testele" value="10"></input><br/>
+AA3 <input type="text" id="testaa3" value="0"></input><br/>
+<button id="run">Run</button>	
+<div id="output"></div>
+</body>
+</html>
