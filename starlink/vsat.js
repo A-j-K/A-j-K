@@ -429,6 +429,8 @@ function skipPast(string)
 
 function show_sat_list(sats, ldate, lat, lon)
 {
+	var cbshowlit = $("#cbshowlit");
+	var showlit = (cbshowlit.prop("checked")) ? true : false;
 	var sunpos = SunCalc.getPosition(ldate, lat, lon);
 	sunpos.altitude = satellite.radiansToDegrees(sunpos.altitude);
 	var h1 = "<strong>", h2 = "</strong>";
@@ -454,7 +456,7 @@ function show_sat_list(sats, ldate, lat, lon)
 	}); 
 
 	sats.forEach(function(rval, index) {
-		if(rval.groundPoint.hgt_kms < 5000.) {
+		if(rval.groundPoint.hgt_kms < 7000.) {
 			var shadow = sunpos.altitude > 0 ? "none" : rval.data.shadow;
 			var id = rval.args.satid;
 			var raan = 0;
@@ -482,8 +484,15 @@ function show_sat_list(sats, ldate, lat, lon)
 				"<td>" + rval.velocityEci.vdot.toFixed(3) + "</td>" +
 				"<td>" + rval.groundPoint.hgt_kms.toFixed(1) + "</td>" +
 				"<td>" + jsUcfirst(shadow) + "</td>" +
-				"</tr>";		
-			$('#maintable tr:last').after(tr);
+				"</tr>";
+			if(showlit) {
+				if(shadow != "umbral") {
+					$('#maintable tr:last').after(tr);
+				}
+			}
+			else {
+				$('#maintable tr:last').after(tr);
+			}
 		}
 	});
 	$('.azimuth_display').click(function(){
