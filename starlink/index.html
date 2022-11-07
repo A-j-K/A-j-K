@@ -104,6 +104,17 @@ S(document).ready(function() {
 		}
 	});
 	
+	$('#btngeolocate').click(function(){
+		if (navigator.geolocation) {
+			navigator.geolocation.getCurrentPosition(function(pos) {
+				var lat = "" + pos.coords.latitude + "";
+				var lon = "" + pos.coords.longitude + "";
+				$('input[name=latitude]').val(lat);
+				$('input[name=longitude]').val(lon);
+			});
+		}
+	});
+	
 	$("#showmaintable").click(function(){
 		$("#maintable_div").toggle();
 	});
@@ -131,18 +142,6 @@ S(document).ready(function() {
 		if(e.keyCode == 32) {
 			var cb = $("#cbexecute").trigger("click", "cbexecute");
 		}
-	}
-	
-	if (navigator.geolocation) {
-		navigator.geolocation.getCurrentPosition(function(pos) {
-			var lat = "" + pos.coords.latitude + "";
-			var lon = "" + pos.coords.longitude + "";
-			$('input[name=latitude]').val(lat);
-			$('input[name=longitude]').val(lon);
-		});
-	}
-	else {
-		confirm("Geolocation is not supported by this browser.");
 	}
 
 });
@@ -180,6 +179,7 @@ S(document).ready(function() {
 	<td colspan="3">
 		<button id="showmaintable">Toggle maintable</button>
 		<button id="showcoords">Toggle obs location</button>
+		<button id="btngeolocate">Geolocate</button>
 		<span style="float: right;">
 		Execute:<input type="checkbox" id="cbexecute" onclick="cb_callback_execute(this.id)" checked /><br/>
 		Realtime:<input type="checkbox" id="cbrealtime" checked /><br/>
