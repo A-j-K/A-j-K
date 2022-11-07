@@ -48,7 +48,7 @@ function set_planetarium(sdate)
 		id: 'starmap',	// This should match the ID used in the DOM
 		credit: false,
 		projection: projection,
-		az: 180, // Initial view direction
+		az: 180, ///////// Initial view direction
 		fov: 15,
 		clock: sdate,
 		keyboard: false,
@@ -56,7 +56,7 @@ function set_planetarium(sdate)
 		negative: false,
 		showplanets: true,
 		showplanetlabels: true,
-		showdate: true,
+		showdate: false,
 		showhelp: false,
 		showstarlabels: true,
 		showgalaxy: false,
@@ -124,7 +124,8 @@ S(document).ready(function() {
 	});
 	
 	if($("#cbexecute").prop("checked") == true) {
-		timer = window.setInterval(scanattimenow, 1000);
+		var updaterate = getUpdateRate();
+		timer = window.setInterval(scanattimenow, updaterate); //1000);
 	}
 	
 	$(".starmap_btn_help").hide();
@@ -153,12 +154,13 @@ S(document).ready(function() {
 <tr id="#virtualsky_tr">
 	<td colspan="3">
 		<!-- <div id="starmap" style="width:100%;height:480px;"></div> -->
-		<div id="starmap" style="width:100%;height:500;"></div>
+		<div id="starmap" style="width:100%;height:800;"></div>
 		</td>
 <tr id="#commandbar_tr">
 	<td colspan="3">
 		<input type="text" id="sdate" value="2019-09-04T02:31:00.000Z"></input>		
-		Rate:<input type="text" id="simspeed" value="1" size="6" maxlength="6"></input>
+		Time step:<input type="text" id="simspeed" value="1" size="4" maxlength="4"></input>
+		Update rate:<input type="text" id="updaterate" value="1" size="4" maxlength="4"></input>
 		<strong><span id="sunelevation"></span></strong>
 		</td>
 	</tr>		

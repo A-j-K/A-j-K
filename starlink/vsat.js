@@ -352,6 +352,13 @@ function getObserverLocation()
 	}
 }
 
+function getUpdateRate()
+{
+	var updaterate = $("#updaterate").val();
+	updaterate = parseFloat(updaterate) * 1000;
+	return parseFloat(updaterate);
+}
+
 function getSimSpeed()
 {
 	var speed = $("#simspeed").val();
@@ -383,7 +390,8 @@ function toggle_execute(id)
 		console.log("Execute checkbox: enabled, starting interval");
 		var simspeed = getSimSpeed();
 		simspeed *= 1000;
-		timer = window.setInterval(scanattimenow, simspeed);
+		var updaterate = getUpdateRate();
+		timer = window.setInterval(scanattimenow, updaterate); //simspeed);
 		executing = true;
 	}
 }
