@@ -132,6 +132,18 @@ S(document).ready(function() {
 			var cb = $("#cbexecute").trigger("click", "cbexecute");
 		}
 	}
+	
+	if (navigator.geolocation) {
+		navigator.geolocation.getCurrentPosition(function(pos) {
+			var lat = "" + pos.coords.latitude + "";
+			var lon = "" + pos.coords.longitude + "";
+			$('input[name=latitude]').val(lat);
+			$('input[name=longitude]').val(lon);
+		});
+	}
+	else {
+		confirm("Geolocation is not supported by this browser.");
+	}
 
 });
 </script>
@@ -183,9 +195,9 @@ S(document).ready(function() {
 		<span style="float: right;">
 		<span id="coords" style="display:none;">
 		<strong>Your observing location</strong><br/>
-		Latitude:<input size="10" maxlength="10" type="text" id="latitude" value=""></input><br/>
+		Latitude:<input size="10" maxlength="10" type="text" name="latitude" id="latitude" value=""></input><br/>
 		Note, latitude + for north and - for south.<br/>
-		Longitude:<input size="10" maxlength="10" type="text" id="longitude" value=""></input><br/>
+		Longitude:<input size="10" maxlength="10" type="text" name="longitude" id="longitude" value=""></input><br/>
 		Note, longitude + for east and - for west.<br/>
 		Height:<input size="8" type="text" id="height" value=""></input><br/>
 		Note, height in metres.<br/>
