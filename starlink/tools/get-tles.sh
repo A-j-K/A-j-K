@@ -4,7 +4,7 @@ SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 DATE=$(date +'%Y-%m-%d')
 
-FOLDER="${SCRIPTDIR}/TLE_${DATE}"
+FOLDER="${SCRIPTDIR}/TLES/TLE_${DATE}"
 
 if [[ ! -d $FOLDER ]]; then
         mkdir $FOLDER
@@ -24,21 +24,21 @@ if [[ -e $FOLDER/starlink.2le ]]; then
         ${SCRIPTDIR}/tle2json $FOLDER/starlink.2le $FOLDER/starlink-2le.json
 fi
 
-if [[ ! -d "${SCRIPTDIR}/TLE_DEFAULT" ]]; then
+if [[ ! -d "${SCRIPTDIR}/TLES/TLE_DEFAULT" ]]; then
         mkdir "${SCRIPTDIR}/TLE_DEFAULT"
 fi
 
-if [[ -d "${SCRIPTDIR}/TLE_DEFAULT" ]]; then
+if [[ -d "${SCRIPTDIR}/TLES/TLE_DEFAULT" ]]; then
         if [[ -e $FOLDER/starlink.2le ]]; then
-                cp -f $FOLDER/starlink.2le ${SCRIPTDIR}/TLE_DEFAULT/starlink.2le
+                cp -f $FOLDER/starlink.2le ${SCRIPTDIR}/TLES/TLE_DEFAULT/starlink.2le
         fi
         if [[ -e $FOLDER/starlink.tle ]]; then
-                cp -f $FOLDER/starlink.tle ${SCRIPTDIR}/TLE_DEFAULT/starlink.tle
+                cp -f $FOLDER/starlink.tle ${SCRIPTDIR}/TLES/TLE_DEFAULT/starlink.tle
         fi
         if [[ -e $FOLDER/starlink.json.gz ]]; then
-                cp -f $FOLDER/starlink.json.gz ${SCRIPTDIR}/TLE_DEFAULT/starlink.json.gz
+                cp -f $FOLDER/starlink.json.gz ${SCRIPTDIR}/TLES/TLE_DEFAULT/starlink.json.gz
         fi
         if [[ -e $FOLDER/starlink-2le.json ]]; then
-                cp -f $FOLDER/starlink-2le.json ${SCRIPTDIR}/TLE_DEFAULT/starlink-2le.json
+                cp -f $FOLDER/starlink-2le.json ${SCRIPTDIR}/TLES/TLE_DEFAULT/starlink-2le.json
         fi
 fi
