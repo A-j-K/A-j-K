@@ -24,6 +24,10 @@ if [[ -e $FOLDER/starlink.2le ]]; then
         ${SCRIPTDIR}/tle2json $FOLDER/starlink.2le $FOLDER/starlink-2le.json
 fi
 
+if [[ -e $FOLDER/starlink.tle ]]; then
+        ${SCRIPTDIR}/tle3json $FOLDER/starlink.tle $FOLDER/starlink-tle.json
+fi
+
 if [[ ! -d "${SCRIPTDIR}/TLES/TLE_DEFAULT" ]]; then
         mkdir "${SCRIPTDIR}/TLE_DEFAULT"
 fi
