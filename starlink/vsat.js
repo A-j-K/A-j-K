@@ -80,14 +80,14 @@ function sat(args, with_vel_mag = true, stime = false)
 	rval.lookAngles.az_degrees = satellite.radiansToDegrees(lookAngles.azimuth);
 	rval.lookAngles.el_degrees = satellite.radiansToDegrees(lookAngles.elevation);
 
-	var sunpos_altaz_radians = SunCalc.getPosition(at_time, args.lat, args.lon);
+	var sunpos_altaz_radians = args.sunpos;
 	rval.data.sunpos_altaz_radians = sunpos_altaz_radians;
 	rval.data.sunpos_altaz_degrees ={};
 	rval.data.sunpos_altaz_degrees.altitude = satellite.radiansToDegrees(sunpos_altaz_radians.altitude);
 	rval.data.sunpos_altaz_degrees.azimuth = satellite.radiansToDegrees(sunpos_altaz_radians.azimuth);
 
 	// Earth's shadow calculations, see https://www.celestrak.com/columns/v03n01/
-	rval.data.sunpos_eci = sunpos_eci(at_time);
+	rval.data.sunpos_eci = args.sunpos_eci;
 	rval.data.psun = Math.sqrt( // Distance, in km, between satellite and Sun's centre
 		Math.pow(positionAndVelocity.position.x - rval.data.sunpos_eci.x, 2) +
 		Math.pow(positionAndVelocity.position.y - rval.data.sunpos_eci.y, 2) +
@@ -121,6 +121,15 @@ function sat(args, with_vel_mag = true, stime = false)
 
 	rval.ok = true;
 	return rval;
+}
+
+function fix_sun_azm(azm)
+{
+	// For unknown reasons the Suncal library returns the
+	// azm as 0 for south an PI for north.
+	azm += Math.PI;
+	if(azm > (2 * Math.PI)) azm = (2*Math.PI) - azm;
+	return azm;
 }
 
 // Suns position in the ECI frame.
@@ -453,6 +462,7 @@ function show_sat_list(sats, ldate, lat, lon)
 		"<td>" + h1 + "Az" + h2 + "</td>" +
 		"<td>" + h1 + "El" + h2 + "</td>" +
 		"<td>" + h1 + "Range (km)" + h2 + "</td>" +
+		"<td>" + h1 + "Sun Angle" + h2 + "</td>" +
 		"<td>" + h1 + "Speed (km/s)" + h2 + "</td>" +
 		"<td>" + h1 + "Height (km)" + h2 + "</td>" +
 		"<td>" + h1 + "Shadow" + h2 + "</td>" +
@@ -489,6 +499,7 @@ function show_sat_list(sats, ldate, lat, lon)
 				'<td><span class="azimuth_display">' + rval.lookAngles.az_degrees.toFixed(1) + "</span>°</td>" +
 				"<td>" + rval.lookAngles.el_degrees.toFixed(1) + "°</td>" +
 				"<td>" + rval.lookAngles.range_kms.toFixed(1) + "</td>" +
+				"<td>" + 0.00 + "</td>" +
 				"<td>" + rval.velocityEci.vdot.toFixed(3) + "</td>" +
 				"<td>" + rval.groundPoint.hgt_kms.toFixed(1) + "</td>" +
 				"<td>" + jsUcfirst(shadow) + "</td>" +
@@ -556,7 +567,7 @@ function load_sat(l0, l1, l2, name = "iss", sname = "iss", push = false)
 function load_sats()
 {
 	sats = new Array;
-	$.getJSON("all.json",
+	$.getJSON("TLES/TLE_DEFAULT/starlink-2le.json", //all.json",
 	function(data) {
 		data.forEach(function(item, index) {
 			var havesat = false;
@@ -569,8 +580,9 @@ function load_sats()
 					}
 				});
 				if(!havesat) {
-					pos = item.SOURCE.indexOf(".json");
-					localsat = load_sat(item.TLE_LINE0, item.TLE_LINE1, item.TLE_LINE2, item.SOURCE, item.SOURCE.substr(0, pos));
+					pos = ""; //item.SOURCE.indexOf(".json");
+					//localsat = load_sat(item.TLE_LINE0, item.TLE_LINE1, item.TLE_LINE2, item.SOURCE, item.SOURCE.substr(0, pos));
+					localsat = load_sat("", item.TLE_LINE1, item.TLE_LINE2, "default", ""); //item.SOURCE.substr(0, pos));					
 					sats.push(localsat);
 				}
 			}
@@ -593,6 +605,10 @@ function drawsats_array(sats, planetarium)
 	});
 }
 
+function sat_sun_angle(sat_rval)
+{
+	return 0;
+}
 
 function scannow()
 {
@@ -603,12 +619,19 @@ function scannow()
 	var lat = obs.lat;
 	var lon = obs.lon;
 
+	var s = sunpos_eci(ldate);
 	var sunpos = SunCalc.getPosition(ldate, obs.lat, obs.lon);
 	var sunpostxt = "Sun elevation: " +
 		satellite.radiansToDegrees(sunpos.altitude).toFixed(1) + "°, " +
-		satellite.radiansToDegrees(sunpos.azimuth).toFixed(1) + "° " +
+		satellite.radiansToDegrees(fix_sun_azm(sunpos.azimuth)).toFixed(1) + "° " +
 		" &nbsp; Num of satellites loaded " + satellites.length.toString();
 	$("#sunelevation").html(sunpostxt);
+	
+	var sunaz = satellite.radiansToDegrees(fix_sun_azm(sunpos.azimuth));
+	sunaz -= 180.0;
+	if(sunaz<0) sunaz = 360.0 - sunaz;
+	planetarium.updateAzimuth(sunaz);
+	
 	satellites.forEach(function(item, index){
 		if(item.handle > 0) {
 			item.handle--;
@@ -625,7 +648,9 @@ function scannow()
 					tleLine1: item.line1,
 					tleLine2: item.line2,
 					source: item.source_short,
-					satrec: item.satrec
+					satrec: item.satrec,
+					sunpos: sunpos,
+					sunpos_eci: s
 			};
 			var rval = sat(args, true);
 			var tleage = jd - rval.data.sat.jdsatepoch;
@@ -656,6 +681,8 @@ function scannow()
 						if(rval2.lookAngles.el_degrees > 0) {
 							args.at_time = t; // restore time
 							rval.args = args;
+							sunangle = sat_sun_angle(rval);
+							rval.sunangle = sunangle;
 							display_sats.push(rval);
 							i = 500;
 						}
