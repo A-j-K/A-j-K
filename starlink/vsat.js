@@ -567,7 +567,7 @@ function load_sat(l0, l1, l2, name = "iss", sname = "iss", push = false)
 function load_sats()
 {
 	sats = new Array;
-	$.getJSON("TLES/TLE_DEFAULT/starlink-2le.json", //all.json",
+	$.getJSON("TLES/TLE_DEFAULT/starlink-tle.json", //all.json",
 	function(data) {
 		data.forEach(function(item, index) {
 			var havesat = false;
