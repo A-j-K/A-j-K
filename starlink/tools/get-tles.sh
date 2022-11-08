@@ -45,4 +45,7 @@ if [[ -d "${SCRIPTDIR}/TLES/TLE_DEFAULT" ]]; then
         if [[ -e $FOLDER/starlink-2le.json ]]; then
                 cp -f $FOLDER/starlink-2le.json ${SCRIPTDIR}/TLES/TLE_DEFAULT/starlink-2le.json
         fi
+		if [[ -e $FOLDER/starlink-tle.json ]]; then
+                cp -f $FOLDER/starlink-tle.json ${SCRIPTDIR}/TLES/TLE_DEFAULT/starlink-tle.json
+        fi
 fi
