@@ -7,7 +7,7 @@ DATE=$(date +'%Y-%m-%d')
 FOLDER="${SCRIPTDIR}/TLES/TLE_${DATE}"
 
 if [[ ! -d $FOLDER ]]; then
-        mkdir $FOLDER
+        mkdir -p $FOLDER
 fi
 
 curl -sSL "https://celestrak.org/NORAD/elements/gp.php?GROUP=starlink&FORMAT=2le" > $FOLDER/starlink.2le
