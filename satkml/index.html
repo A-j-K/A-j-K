@@ -1,0 +1,110 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+body
+{
+	/* font-family: "courier new"; */
+	/* font-size: 0.75em; */
+}
+
+.maindisplay
+{
+	font-family: "courier new";
+	font-size: 0.70em;
+	font-weight: bold;
+	border-style: solid;
+	border-color: black;
+	border-width: 1px;
+	padding: 10px;
+}
+</style>
+
+<script src = "https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js" integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ==" crossorigin = "anonymous" referrerpolicy = "no-referrer"> </script>
+<script src="jquery-3.4.1.min.js"></script>
+<script src="satellite.js"></script>
+<script src="app.js"></script>
+
+<script>
+
+$(document).ready(function() {
+	var sdate_str = $("#sdate").val();
+	var sdate = sdate_str.length > 0 ? new Date(sdate_str) : new Date("2023-09-01T16:55:28.241Z");
+	var l0_str = $("#satline0").val();
+	var scantime_str = $("#scantime").val();
+	var scantime = scantime_str.length > 0 ? scantime_str : "3";
+	var l0 = l0_str.length > 0 ? l0_str : "ISS";
+	var l1_str = $("#satline1").val();
+	var l1 = l1_str.length > 0 ? l1_str : "1 25544U 98067A   23244.35101433  .00012543  00000-0  22636-3 0  9992";
+	var l2_str = $("#satline2").val();
+	var l2 = l2_str.length > 0 ? l2_str : "2 25544  51.6431 311.2283 0005359  20.4959 103.4633 15.50125068413600";
+	
+	$("#sdate").val(sdate.toISOString());
+	$("#scantime").val(scantime);
+	$("#satline0").val(l0);
+	$("#satline1").val(l1);
+	$("#satline2").val(l2);
+	
+	$('#btn_execute').click(function(){
+		execute();
+	});
+
+	$('#btn_savefile').click(function() {
+		var filename = $('#satline0').val() + ".kml";
+		var blobdata = $('#maintable').text();
+		var blob = new Blob([ blobdata ], {
+			type: "text/plain;charset=utf-8"
+		});
+		saveAs(blob, filename);
+	});
+
+});
+</script>
+
+</head>
+<body>
+<table>
+	<tr>
+		<td>TLE line 0</td>
+		<td><input type="text" id="satline0" size="30" style="font-family: monospace;"></input></td>
+	</tr>
+	<tr>
+		<td>TLE line 1</td>
+		<td><input type="text" id="satline1" size="75" style="font-family: monospace;"></input></td>
+	</tr>
+	<tr>
+		<td>TLE line 2</td>
+		<td><input type="text" id="satline2" size="75" style="font-family: monospace;"></input></td>
+	</tr>
+	<tr>
+		<td>Start date/time (ISO8601 format)</td>
+		<td><input type="text" id="sdate" size="24" style="font-family: monospace;"></input></td>
+	</tr>
+	<tr>
+		<td>Time step (in seconds)</td>
+		<td><input type="text" id="timestep" value="1" size="8" style="font-family: monospace;"></input></td>
+	</tr>
+	<tr>
+		<td>Scan Time (minutes)</td>
+		<td><input type="text" id="scantime" value="3" size="8" style="font-family: monospace;"></input></td>
+	</tr>
+	<tr>
+		<td>Edge step (in Time steps)</td>
+		<td><input type="text" id="edgestep" value="0" size="8" style="font-family: monospace;"></input></td>
+	</tr>
+	<tr>
+		<td>&nbsp;</td>
+		<td><button id="btn_execute">Run</button></td>
+	</tr>
+	</table>
+
+	<br/><br/>
+
+<button id="btn_copyclip" style="display:none;" onClick="CopyToClipboard('maintable')" >Copy to clipboard</button>
+&nbsp; &nbsp;
+<button id="btn_savefile"  style="display:none;">Save file</button>
+
+<div id="maintable" class="maindisplay"	style="display:none; font-family:monospace;">
+</div>
+</body>
+</html>
